@@ -7,32 +7,26 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        run: python -m pip install --upgrade pip
 
       - name: Download Python Script from Gist
-        run: |
-          curl -L -o get_tds_cert.py https://gist.githubusercontent.com/lnattrass/a4a91dbf439fc1719d69f7865c1b1791/raw/804fd5e01c124c6d3ea2726fec822ff37e99cbe3/get_tds_cert.py
+        run: curl -L -o get_tds_cert.py https://gist.githubusercontent.com/lnattrass/a4a91dbf439fc1719d69f7865c1b1791/raw/804fd5e01c124c6d3ea2726fec822ff37e99cbe3/get_tds_cert.py
 
       - name: Install PyInstaller
-        run: |
-          python -m pip install --upgrade pip
-          pip install pyinstaller
+        run: pip install pyinstaller
 
       - name: Build EXE
-        run: |
-          pyinstaller --onefile get_tds_cert.py
-        shell: bash
+        run: pyinstaller --onefile get_tds_cert.py
 
       - name: Generate Random Tag
-        id: generate_tag
-        run: echo "::set-output name=tag::v$(date +'%Y%m%d%H%M%S')"
+        run: echo "TAG_NAME=v$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
 
       - name: Create Release
         id: create_release
@@ -40,8 +34,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.generate_tag.outputs.tag }}
-          release_name: Automated Release ${{ steps.generate_tag.outputs.tag }}
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: Automated Release ${{ env.TAG_NAME }}
           draft: false
           prerelease: false
 
