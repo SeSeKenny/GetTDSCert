@@ -3,7 +3,7 @@ name: Build and Release EXE
 on:
   push:
     branches:
-      - main  # Replace 'main' with the branch name you want to trigger the release on
+      - main  # Replace 'main' with the branch you want to trigger the release on
 
 jobs:
   build:
@@ -27,7 +27,7 @@ jobs:
 
       - name: Generate Random Tag
         id: generate_tag
-        run: echo "TAG_NAME=v$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+        run: echo "::set-output name=TAG_NAME::v$(date +'%Y%m%d%H%M%S')"
 
       - name: Create Release
         id: create_release
@@ -35,8 +35,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.TAG_NAME }}
-          release_name: Automated Release ${{ env.TAG_NAME }}
+          tag_name: ${{ steps.generate_tag.outputs.TAG_NAME }}
+          release_name: Automated Release ${{ steps.generate_tag.outputs.TAG_NAME }}
           draft: false
           prerelease: false
 
