@@ -26,6 +26,7 @@ jobs:
         run: pyinstaller --onefile get_tds_cert.py
 
       - name: Generate Random Tag
+        id: generate_tag
         run: echo "TAG_NAME=v$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
 
       - name: Create Release
