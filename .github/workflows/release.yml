@@ -1,0 +1,49 @@
+name: Build and Release EXE
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 'latest'
+
+      - name: Download Python Script from Gist
+        run: |
+          curl -L -o get_tds_cert.py https://gist.githubusercontent.com/lnattrass/a4a91dbf439fc1719d69f7865c1b1791/raw/804fd5e01c124c6d3ea2726fec822ff37e99cbe3/get_tds_cert.py
+
+      - name: Install PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+
+      - name: Build EXE
+        run: |
+          pyinstaller --onefile get_tds_cert.py
+        shell: bash
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/get_tds_cert.exe
+          asset_name: get_tds_cert.exe
+          asset_content_type: application/octet-stream
